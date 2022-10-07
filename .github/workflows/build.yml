@@ -6,7 +6,7 @@ name: Build-All-Platforms
 on:
   # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
-    branches: ["main"]
+    branches: [ "main" ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        os: [ macos-latest, ubuntu-latest, windows-latest ]
 
     runs-on: ${{ matrix.os }}
 
@@ -37,7 +37,7 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      - Name: Build Executable
+      - name: Build Executable
         uses: Nuitka/Nuitka-Action@v0.4
         with:
           script-name: main.py
