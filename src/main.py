@@ -2,7 +2,7 @@ import datetime
 import json
 import os.path
 import sys
-
+import re
 import requests
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import *
@@ -19,10 +19,11 @@ class App(QDialog):
         self.width = 600
         self.height = 200
         # Check Config
-        if os.path.isfile('config.json'):
-            config = json.load(open('config.json'))
+        config_path = os.path.join(os.path.dirname(sys.argv[0]), 'config.json')
+        if os.path.isfile(config_path):
+            config = json.load(open(config_path))
         else:
-            config = open('config.json', 'w')
+            config = open(config_path, 'w')
             with config as f:
                 json.dump({
                     'title': 'Test API',
@@ -32,7 +33,7 @@ class App(QDialog):
                     'group': '127',
                     'responsible': '113',
                     'created_by': '1179'}, f)
-            config = json.load(open('config.json', 'r'))
+            config = json.load(open(config_path, 'r'))
         # Set Config
         self.title = config['title']
         self.description = config['description']
@@ -104,10 +105,17 @@ class App(QDialog):
         if req.status_code == 200:
             self.popup('Success', 'Task Created')
         else:
-            self.popup('Error', 'Task Failed')
+            text_error = str(req.text)
+            error_code = re.findall(r'(?<=error":)(.*?)(?=,)', text_error)
+            error_desc = re.findall(r'(?<=error_description":")(.*?)(?="})', text_error)
+            if error_code and error_desc:
+                self.popup('Error', 'Error Code: ' + error_code[0] + '\nError Description: ' + error_desc[0])
+            else:
+                self.popup('Error', 'Error Code: ' + str(req.status_code) + '\nError Description: ' + str(req.text))
 
     def save(self):
-        config = open('config.json', 'w')
+        config_path = os.path.join(os.path.dirname(sys.argv[0]), 'config.json')
+        config = open(config_path, 'w')
         with config as f:
             json.dump({
                 'title': self.le_title.text(),
@@ -143,7 +151,8 @@ class App(QDialog):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    app.setWindowIcon(QIcon('logo.jpg'))
+    logo = os.path.join(os.path.dirname(sys.argv[0]), 'logo.png')
+    app.setWindowIcon(QIcon(logo))
     form = App()
     form.show()
     app.exec_()
