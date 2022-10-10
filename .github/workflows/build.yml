@@ -42,6 +42,7 @@ jobs:
         with:
           script-name: src/main.py
           standalone: true
+          macos-create-app-bundle: true
           enable-plugins: pyqt5
 
       - name: Upload Artifacts
